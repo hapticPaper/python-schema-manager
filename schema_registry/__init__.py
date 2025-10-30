@@ -14,6 +14,8 @@ from .data_caster import DataCaster
 from .parquet_exporter import ParquetExporter
 from .sql_types import SQLType
 
+__version__ = "0.1.0"
+
 __all__ = [
     'SchemaLoader',
     'DataCaster',

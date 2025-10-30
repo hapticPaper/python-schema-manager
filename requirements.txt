@@ -1,0 +1,15 @@
+# Core dependencies for python-schema-manager
+# These are the minimum required packages for the library to function
+
+# Data validation and parsing
+pydantic>=2.0.0
+
+# Data manipulation and analysis
+pandas>=1.5.0
+
+# Parquet file support
+pyarrow>=10.0.0
+
+# Optional: Structured logging (recommended)
+# Uncomment the line below if you want structured logging support
+# structlog>=22.0.0

@@ -1,0 +1,23 @@
+# Development dependencies for python-schema-manager
+# Install with: pip install -r requirements-dev.txt
+
+# Include core requirements
+-r requirements.txt
+
+# Optional structured logging
+structlog>=22.0.0
+
+# Testing
+pytest>=7.0.0
+pytest-cov>=4.0.0
+
+# Code formatting and linting
+black>=22.0.0
+flake8>=5.0.0
+mypy>=1.0.0
+
+# Pre-commit hooks for code quality
+pre-commit>=2.20.0
+
+# Type checking stubs
+types-setuptools>=65.0.0
