@@ -1,0 +1,48 @@
+{
+  "name": "user_events",
+  "description": "Example schema for user event tracking",
+  "columns": [
+    {
+      "name": "event_id",
+      "type": "STRING",
+      "mode": "REQUIRED",
+      "description": "Unique event identifier"
+    },
+    {
+      "name": "user_id",
+      "type": "INT64",
+      "mode": "REQUIRED",
+      "description": "User identifier"
+    },
+    {
+      "name": "event_name",
+      "type": "STRING",
+      "mode": "REQUIRED",
+      "description": "Name of the event"
+    },
+    {
+      "name": "event_timestamp",
+      "type": "TIMESTAMP",
+      "mode": "REQUIRED",
+      "description": "When the event occurred (UTC)"
+    },
+    {
+      "name": "session_duration_seconds",
+      "type": "FLOAT64",
+      "mode": "NULLABLE",
+      "description": "Session duration in seconds"
+    },
+    {
+      "name": "is_conversion",
+      "type": "BOOL",
+      "mode": "NULLABLE",
+      "description": "Whether this event was a conversion"
+    },
+    {
+      "name": "event_properties",
+      "type": "JSON",
+      "mode": "NULLABLE",
+      "description": "Event properties as JSON"
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "name": "customer_transactions",
+  "description": "Example schema for customer transaction data",
+  "columns": [
+    {
+      "name": "transaction_id",
+      "type": "STRING",
+      "mode": "REQUIRED",
+      "description": "Unique transaction identifier"
+    },
+    {
+      "name": "customer_id",
+      "type": "INTEGER",
+      "mode": "REQUIRED",
+      "description": "Customer identifier"
+    },
+    {
+      "name": "transaction_amount",
+      "type": "FLOAT",
+      "mode": "REQUIRED",
+      "description": "Transaction amount in USD"
+    },
+    {
+      "name": "transaction_timestamp",
+      "type": "TIMESTAMP",
+      "mode": "REQUIRED",
+      "description": "When the transaction occurred (UTC)"
+    },
+    {
+      "name": "transaction_date",
+      "type": "DATE",
+      "mode": "NULLABLE",
+      "description": "Transaction date"
+    },
+    {
+      "name": "is_refunded",
+      "type": "BOOLEAN",
+      "mode": "NULLABLE",
+      "description": "Whether the transaction was refunded"
+    },
+    {
+      "name": "payment_method",
+      "type": "STRING",
+      "mode": "NULLABLE",
+      "description": "Payment method used"
+    },
+    {
+      "name": "metadata",
+      "type": "JSON",
+      "mode": "NULLABLE",
+      "description": "Additional transaction metadata"
+    }
+  ]
+}
