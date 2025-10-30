@@ -7,6 +7,7 @@ import pandas as pd
 from pathlib import Path
 import tempfile
 from datetime import datetime, date
+import random
 
 from schema_registry import SchemaLoader, ParquetExporter
 
@@ -277,7 +278,6 @@ class TestParquetExporter:
         exporter = ParquetExporter(simple_schema)
         
         # Create a larger dataset
-        import random
         records = [
             {
                 "id": i,
