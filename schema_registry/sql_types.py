@@ -29,6 +29,11 @@ class SQLType(str, Enum):
     JSON = "JSON"
     ARRAY = "ARRAY"
     STRUCT = "STRUCT"
+    UNIQUE = "UNIQUE"
+    UUID = "UUID"
+    GUID = "GUID"
+    REAL = "REAL"
+    TEXT = "TEXT"
 
 
 class TypeHandler:
@@ -189,6 +194,11 @@ TYPE_HANDLERS: dict[SQLType, Callable] = {
     SQLType.BIGNUMERIC: TypeHandler.to_numeric,
     SQLType.BYTES: TypeHandler.to_bytes,
     SQLType.JSON: TypeHandler.to_json,
+    SQLType.UNIQUE: TypeHandler.to_string,
+    SQLType.UUID: TypeHandler.to_string,
+    SQLType.GUID: TypeHandler.to_string,
+    SQLType.REAL: TypeHandler.to_float,
+    SQLType.TEXT: TypeHandler.to_string,
 }
 
 
@@ -208,4 +218,9 @@ PANDAS_DTYPE_MAP: dict[SQLType, str] = {
     SQLType.BIGNUMERIC: 'float64',
     SQLType.BYTES: 'object',
     SQLType.JSON: 'object',
+    SQLType.UNIQUE: 'object',
+    SQLType.UUID: 'object',
+    SQLType.GUID: 'object',
+    SQLType.REAL: 'float64',
+    SQLType.TEXT: 'object',
 }
