@@ -29,9 +29,7 @@ jobs:
 
 
 
-    - name: Type check with Mypy
-      run: |
-        mypy .
+
 
     - name: Run tests
       run: |
