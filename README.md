@@ -6,6 +6,12 @@ A lightweight ETL utility package for lean_hatch that provides schema-driven dat
 
 This ETL utility centralizes data type handling, validation, and export functionality to ensure consistency across different platforms (parquet files, BigQuery, etc.). It's designed to be simple, efficient, and easy to integrate into ETL pipelines.
 
+I like and use Alembic. Its great for warehouse schema management when the schemas are changing.
+This isn't focused on that; we encourage using Alembic for warehouse schema management.
+I use this library to make the transforms in-memory easier to manage, easier to read and maintain.
+While this totally manages a schema definition, and I dont like maintinaing multiple, and that is *strong* motivation to build add alembic support to work together seamlessly. 
+TBD.
+
 ## Features
 
 - **Schema-driven data validation**: Define schemas using JSON with SQL types

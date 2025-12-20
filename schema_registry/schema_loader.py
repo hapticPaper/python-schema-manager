@@ -11,6 +11,7 @@ from pydantic import BaseModel, Field, field_validator, ConfigDict
 from .sql_types import SQLType
 
 
+
 class ColumnSchema(BaseModel):
     """Schema definition for a single column."""
     
@@ -20,6 +21,7 @@ class ColumnSchema(BaseModel):
     type: SQLType = Field(..., description="SQL type for the column")
     mode: str = Field(default="NULLABLE", description="Column mode: NULLABLE, REQUIRED, or REPEATED")
     description: str | None = Field(default=None, description="Column description")
+    computation: str | None = Field(default=None, description="Computation logic (e.g., \"strftime(col, '%Y%m')\")")
     
     @field_validator('mode')
     @classmethod

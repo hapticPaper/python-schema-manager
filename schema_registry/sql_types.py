@@ -36,6 +36,17 @@ class SQLType(str, Enum):
     TEXT = "TEXT"
 
 
+class SQLEngine(str, Enum):
+    """Supported SQL Engines."""
+    
+    BIGQUERY = "BIGQUERY"
+    SQLITE = "SQLITE"
+    POSTGRES = "POSTGRES"
+    MYSQL = "MYSQL"
+    VERTICA = "VERTICA"
+    SNOWFLAKE = "SNOWFLAKE"
+
+
 class TypeHandler:
     """Handles type conversion for different SQL types."""
     
@@ -202,25 +213,3 @@ TYPE_HANDLERS: dict[SQLType, Callable] = {
 }
 
 
-# Mapping of SQL types to pandas dtypes for efficient DataFrame operations
-PANDAS_DTYPE_MAP: dict[SQLType, str] = {
-    SQLType.STRING: 'object',
-    SQLType.INTEGER: 'Int64',
-    SQLType.INT64: 'Int64',
-    SQLType.FLOAT: 'float64',
-    SQLType.FLOAT64: 'float64',
-    SQLType.BOOLEAN: 'boolean',
-    SQLType.BOOL: 'boolean',
-    SQLType.TIMESTAMP: 'datetime64[ns, UTC]',
-    SQLType.DATETIME: 'datetime64[ns]',
-    SQLType.DATE: 'object',
-    SQLType.NUMERIC: 'float64',
-    SQLType.BIGNUMERIC: 'float64',
-    SQLType.BYTES: 'object',
-    SQLType.JSON: 'object',
-    SQLType.UNIQUE: 'object',
-    SQLType.UUID: 'object',
-    SQLType.GUID: 'object',
-    SQLType.REAL: 'float64',
-    SQLType.TEXT: 'object',
-}

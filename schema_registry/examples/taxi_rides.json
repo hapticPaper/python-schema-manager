@@ -1,0 +1,195 @@
+{
+    "name": "fa_hvf",
+    "description": "Trip records from the NYC high-volume for-hire vehicle (HVFHV) program",
+    "columns": [
+        {
+            "name": "hvfhs_license_num",
+            "type": "TEXT",
+            "mode": "NULLABLE",
+            "description": "TLC HVFHV license identifier"
+        },
+        {
+            "name": "dispatching_base_num",
+            "type": "TEXT",
+            "mode": "NULLABLE",
+            "description": "Base number that dispatched the trip"
+        },
+        {
+            "name": "originating_base_num",
+            "type": "TEXT",
+            "mode": "NULLABLE",
+            "description": "Base number that received the trip request"
+        },
+        {
+            "name": "request_datetime",
+            "type": "DATETIME",
+            "mode": "NULLABLE",
+            "description": "Unix timestamp for when the trip was requested"
+        },
+        {
+            "name": "on_scene_datetime",
+            "type": "DATETIME",
+            "mode": "NULLABLE",
+            "description": "Unix timestamp for driver arrival at pickup"
+        },
+        {
+            "name": "pickup_datetime",
+            "type": "DATETIME",
+            "mode": "NULLABLE",
+            "description": "Unix timestamp for pickup"
+        },
+        {
+            "name": "dropoff_datetime",
+            "type": "DATETIME",
+            "mode": "NULLABLE",
+            "description": "Unix timestamp for dropoff"
+        },
+        {
+            "name": "PULocationID",
+            "type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Pickup zone ID"
+        },
+        {
+            "name": "DOLocationID",
+            "type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Dropoff zone ID"
+        },
+        {
+            "name": "trip_miles",
+            "type": "REAL",
+            "mode": "NULLABLE",
+            "description": "Trip distance in miles"
+        },
+        {
+            "name": "trip_time",
+            "type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Trip duration in seconds"
+        },
+        {
+            "name": "base_passenger_fare",
+            "type": "REAL",
+            "mode": "NULLABLE",
+            "description": "Fare charged before surcharges"
+        },
+        {
+            "name": "tolls",
+            "type": "REAL",
+            "mode": "NULLABLE",
+            "description": "Total tolls"
+        },
+        {
+            "name": "bcf",
+            "type": "REAL",
+            "mode": "NULLABLE",
+            "description": "Black Car Fund contribution"
+        },
+        {
+            "name": "sales_tax",
+            "type": "REAL",
+            "mode": "NULLABLE",
+            "description": "Sales tax amount"
+        },
+        {
+            "name": "congestion_surcharge",
+            "type": "REAL",
+            "mode": "NULLABLE",
+            "description": "Congestion surcharge"
+        },
+        {
+            "name": "airport_fee",
+            "type": "REAL",
+            "mode": "NULLABLE",
+            "description": "Airport access fee"
+        },
+        {
+            "name": "tips",
+            "type": "REAL",
+            "mode": "NULLABLE",
+            "description": "Tip amount"
+        },
+        {
+            "name": "driver_pay",
+            "type": "REAL",
+            "mode": "NULLABLE",
+            "description": "Driver pay for the trip"
+        },
+        {
+            "name": "shared_request_flag",
+            "type": "TEXT",
+            "mode": "NULLABLE",
+            "description": "Y/N flag for shared-ride request"
+        },
+        {
+            "name": "shared_match_flag",
+            "type": "TEXT",
+            "mode": "NULLABLE",
+            "description": "Y/N flag for shared-ride match"
+        },
+        {
+            "name": "access_a_ride_flag",
+            "type": "TEXT",
+            "mode": "NULLABLE",
+            "description": "Y/N flag for Access-A-Ride trip"
+        },
+        {
+            "name": "wav_request_flag",
+            "type": "TEXT",
+            "mode": "NULLABLE",
+            "description": "Y/N flag for wheelchair accessible request"
+        },
+        {
+            "name": "wav_match_flag",
+            "type": "TEXT",
+            "mode": "NULLABLE",
+            "description": "Y/N flag for wheelchair accessible match"
+        },
+        {
+            "name": "id",
+            "type": "INTEGER",
+            "mode": "NULLABLE",
+            "description": "Synthetic record identifier"
+        },
+
+        
+
+        {
+            "name": "request_month",
+            "type": "INTEGER",
+            "mode": "NULLABLE",
+            "computation": "strftime(request_datetime, '%Y%m')"
+        },
+        {
+            "name": "on_scene_month",
+            "type": "INTEGER",
+            "mode": "NULLABLE",
+            "computation": "strftime(on_scene_datetime, '%Y%m')"
+        },
+        {
+            "name": "pickup_month",
+            "type": "INTEGER",
+            "mode": "NULLABLE",
+            "computation": "strftime(pickup_datetime, '%Y%m')"
+        },
+        {
+            "name": "dropoff_month",
+            "type": "INTEGER",
+            "mode": "NULLABLE",
+            "computation": "strftime(dropoff_datetime, '%Y%m')"
+        },
+        {
+            "name": "pickup_date",
+            "type": "INTEGER",
+            "mode": "NULLABLE",
+            "computation": "strftime(pickup_datetime, '%Y%m%d')"
+        },
+        {
+            "name": "refreshed",
+            "type": "INTEGER",
+            "mode": "NULLABLE",
+            "computation": "now()"
+        }
+    ]
+}
