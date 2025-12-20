@@ -72,3 +72,4 @@ dmypy.json
 *.parquet
 .taskmaster/
 log_config.py
+benchmark_performance.py

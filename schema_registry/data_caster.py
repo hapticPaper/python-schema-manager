@@ -235,30 +235,55 @@ class DataCaster:
                     if column.name not in casted_df.columns:
                         continue
 
+                    # Optimization: Skip processing for all-null columns
+                    if casted_df[column.name].isna().all():
+                        if column.mode == "REQUIRED":
+                            raise ValueError(f"Required column '{column.name}' cannot be all null")
+                        
+                        target_dtype = self.pandas_dtype_map.get(column.type)
+                        if target_dtype:
+                            try:
+                                casted_df[column.name] = casted_df[column.name].astype(target_dtype)
+                            except (ValueError, TypeError):
+                                pass
+                        continue
+
                     current_dtype = casted_df[column.name].dtype
+
+                    # Optimization: Complex types (JSON/STRUCT/ARRAY)
+                    # If the column is object type and already contains dicts/lists, skip casting
+                    complex_types = (SQLType.JSON, SQLType.ARRAY, SQLType.STRUCT)
+                    if column.type in complex_types:
+                        # Check sample value
+                        try:
+                            # dropna() to get a real value, iloc[0] to get the first one
+                            sample = casted_df[column.name].dropna().iloc[0]
+                            if isinstance(sample, (dict, list)):
+                                # valid format, no casting needed!
+                                continue
+                        except (IndexError, AttributeError):
+                            # Column likely empty or all null, handled by above check mostly,
+                            # but safe to fall through
+                            pass
 
                     # For timestamp columns, use pandas-optimized conversion
                     if column.type in (SQLType.TIMESTAMP, SQLType.DATETIME):
                         # Optimization: Skip if already datetime
                         if pd.api.types.is_datetime64_any_dtype(current_dtype):
-                            # Ensure UTC for TIMESTAMP if needed
                             if column.type == SQLType.TIMESTAMP:
-                                # If no timezone, localize. If timezone, convert.
-                                # For now, simplistic check: if it is datetime64[ns, UTC], skip.
+                                # Ensure UTC
                                 if str(current_dtype) == "datetime64[ns, UTC]":
                                     continue
-                                # Else falling through to to_datetime might be safest for tz conversion
                             else:
-                                # DATETIME (no tz)
                                 if str(current_dtype).startswith("datetime64[ns]"):
                                     continue
-
-                        # Ensure UTC timezone for timestamps (BigQuery requirement)
+                        
                         casted_df[column.name] = pd.to_datetime(
                             casted_df[column.name],
                             utc=(column.type == SQLType.TIMESTAMP),
                             errors="coerce",
                         )
+                    
                     elif column.type == SQLType.DATE:
                         # Optimization: Skip if already date objects (object dtype usually) or datetime
                         # Hard to verify 'date' objects in object dtype efficiently without checking values.
@@ -268,35 +293,27 @@ class DataCaster:
                         casted_df[column.name] = pd.to_datetime(
                             casted_df[column.name], errors="coerce"
                         ).dt.date
-                    else:
-                        # Optimization: Try to use batch astype if dialect provides a map
-                        target_dtype = self.pandas_dtype_map.get(column.type)
 
-                        # Check if already correct dtype
-                        # Optimization: JSON/ARRAY/STRUCT types are object,
-                        # but need parsing from string
-                        complex_types = (SQLType.JSON, SQLType.ARRAY, SQLType.STRUCT)
-                        if (
-                            target_dtype
-                            and str(current_dtype) == target_dtype
-                            and column.type not in complex_types
-                        ):
-                            # Already correct
-                            mapped = True
-                        else:
-                            mapped = False
-                            if target_dtype and column.type not in complex_types:
+                    else:
+                        # Optimization: Try to use batch astype
+                        target_dtype = self.pandas_dtype_map.get(column.type)
+                        mapped = False
+
+                        # Do not attempt astype for complex types unless we are sure (handled above)
+                        if target_dtype and column.type not in complex_types:
+                            # Check if already correct
+                            if str(current_dtype) == target_dtype:
+                                mapped = True
+                            else:
                                 try:
-                                    casted_df[column.name] = casted_df[column.name].astype(
-                                        target_dtype
-                                    )
+                                    casted_df[column.name] = casted_df[column.name].astype(target_dtype)
                                     mapped = True
                                 except (ValueError, TypeError):
                                     pass
-
-                            if not mapped:
-                                # Apply handler to each value
-                                casted_df[column.name] = casted_df[column.name].apply(handler)
+                        
+                        if not mapped:
+                            # Apply handler to each value as last resort
+                            casted_df[column.name] = casted_df[column.name].apply(handler)
 
                     # Handle required fields
                     if column.mode == "REQUIRED":
