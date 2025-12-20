@@ -17,8 +17,8 @@ from .sql_types import SQLType
 __version__ = "0.1.0"
 
 __all__ = [
-    'SchemaLoader',
-    'DataCaster',
-    'ParquetExporter',
-    'SQLType',
+    "SchemaLoader",
+    "DataCaster",
+    "ParquetExporter",
+    "SQLType",
 ]

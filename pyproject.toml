@@ -4,15 +4,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "python-schema-manager"
-version = "0.1.0"
+version = "1.0.0"
 description = "A lightweight ETL utility package that provides schema-driven data transformation and export capabilities"
 readme = "README.md"
 license = {text = "MIT"}
 authors = [
-    {name = "hapticPaper", email = "your-email@example.com"}
+    {name = "hapticPaper", email = "ian@hapticpaper.com"}
 ]
 maintainers = [
-    {name = "hapticPaper", email = "your-email@example.com"}
+    {name = "hapticPaper", email = "ian@hapticpaper.com"}
 ]
 keywords = ["etl", "schema", "data", "transformation", "parquet", "bigquery", "pandas"]
 classifiers = [
@@ -71,7 +71,7 @@ schema_registry = ["examples/*.json"]
 
 [tool.black]
 line-length = 100
-target-version = ['py38', 'py39', 'py310', 'py311', 'py312']
+target-version = ['py38', 'py39', 'py310', 'py311', 'py312', 'py313', 'py314']
 include = '\.pyi?$'
 extend-exclude = '''
 /(

@@ -71,3 +71,4 @@ dmypy.json
 /tmp/
 *.parquet
 .taskmaster/
+log_config.py

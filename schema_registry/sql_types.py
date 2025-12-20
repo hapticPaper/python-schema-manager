@@ -12,7 +12,7 @@ import pandas as pd
 
 class SQLType(str, Enum):
     """Supported SQL types for schema definitions."""
-    
+
     STRING = "STRING"
     INTEGER = "INTEGER"
     INT64 = "INT64"
@@ -38,7 +38,7 @@ class SQLType(str, Enum):
 
 class SQLEngine(str, Enum):
     """Supported SQL Engines."""
-    
+
     BIGQUERY = "BIGQUERY"
     SQLITE = "SQLITE"
     POSTGRES = "POSTGRES"
@@ -49,7 +49,7 @@ class SQLEngine(str, Enum):
 
 class TypeHandler:
     """Handles type conversion for different SQL types."""
-    
+
     @staticmethod
     def _is_null(value: Any) -> bool:
         """Check if value is null/NA, handling pandas and regular Python types."""
@@ -59,38 +59,38 @@ class TypeHandler:
             return pd.isna(value)
         except (TypeError, ValueError):
             return False
-    
+
     @staticmethod
     def to_string(value: Any) -> str | None:
         """Convert value to string."""
         if TypeHandler._is_null(value):
             return None
         return str(value)
-    
+
     @staticmethod
     def to_integer(value: Any) -> int | None:
         """Convert value to integer."""
         if TypeHandler._is_null(value):
             return None
-        if isinstance(value, str) and value.strip() == '':
+        if isinstance(value, str) and value.strip() == "":
             return None
         try:
             return int(float(value))
         except (ValueError, TypeError):
             return None
-    
+
     @staticmethod
     def to_float(value: Any) -> float | None:
         """Convert value to float."""
         if TypeHandler._is_null(value):
             return None
-        if isinstance(value, str) and value.strip() == '':
+        if isinstance(value, str) and value.strip() == "":
             return None
         try:
             return float(value)
         except (ValueError, TypeError):
             return None
-    
+
     @staticmethod
     def to_boolean(value: Any) -> bool | None:
         """Convert value to boolean."""
@@ -98,56 +98,56 @@ class TypeHandler:
             return None
         if isinstance(value, str):
             value_lower = value.lower().strip()
-            if value_lower in ('true', '1', 'yes', 'y', 't'):
+            if value_lower in ("true", "1", "yes", "y", "t"):
                 return True
-            elif value_lower in ('false', '0', 'no', 'n', 'f', ''):
+            elif value_lower in ("false", "0", "no", "n", "f", ""):
                 return False
             return None
         return bool(value)
-    
+
     @staticmethod
     def to_timestamp(value: Any) -> pd.Timestamp | None:
         """
         Convert value to pandas Timestamp.
-        
+
         This ensures consistent timestamp handling across parquet and BigQuery.
         BigQuery expects UTC timestamps, and parquet handles pandas Timestamps well.
         """
         if TypeHandler._is_null(value):
             return None
-        if isinstance(value, str) and value.strip() == '':
+        if isinstance(value, str) and value.strip() == "":
             return None
-        
+
         try:
             # Parse to pandas Timestamp which handles various formats
             ts = pd.to_datetime(value, utc=True)
             return ts
         except (ValueError, TypeError):
             return None
-    
+
     @staticmethod
     def to_datetime(value: Any) -> datetime | None:
         """Convert value to datetime."""
         if TypeHandler._is_null(value):
             return None
-        if isinstance(value, str) and value.strip() == '':
+        if isinstance(value, str) and value.strip() == "":
             return None
-        
+
         try:
             if isinstance(value, pd.Timestamp):
                 return value.to_pydatetime()
             return pd.to_datetime(value).to_pydatetime()
         except (ValueError, TypeError):
             return None
-    
+
     @staticmethod
     def to_date(value: Any) -> date | None:
         """Convert value to date."""
         if TypeHandler._is_null(value):
             return None
-        if isinstance(value, str) and value.strip() == '':
+        if isinstance(value, str) and value.strip() == "":
             return None
-        
+
         try:
             if isinstance(value, pd.Timestamp):
                 return value.date()
@@ -156,12 +156,12 @@ class TypeHandler:
             return pd.to_datetime(value).date()
         except (ValueError, TypeError):
             return None
-    
+
     @staticmethod
     def to_numeric(value: Any) -> float | None:
         """Convert value to numeric (same as float for most use cases)."""
         return TypeHandler.to_float(value)
-    
+
     @staticmethod
     def to_bytes(value: Any) -> bytes | None:
         """Convert value to bytes."""
@@ -170,9 +170,9 @@ class TypeHandler:
         if isinstance(value, bytes):
             return value
         if isinstance(value, str):
-            return value.encode('utf-8')
-        return str(value).encode('utf-8')
-    
+            return value.encode("utf-8")
+        return str(value).encode("utf-8")
+
     @staticmethod
     def to_json(value: Any) -> dict | list | None:
         """Convert value to JSON (dict or list)."""
@@ -182,6 +182,7 @@ class TypeHandler:
             return value
         if isinstance(value, str):
             import json
+
             try:
                 return json.loads(value)
             except json.JSONDecodeError:
@@ -211,5 +212,3 @@ TYPE_HANDLERS: dict[SQLType, Callable] = {
     SQLType.REAL: TypeHandler.to_float,
     SQLType.TEXT: TypeHandler.to_string,
 }
-
-

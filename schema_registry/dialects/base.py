@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Dict
 from schema_registry.sql_types import SQLType
 
+
 class BaseDialect(ABC):
     """Abstract base class for SQL dialects."""
 
