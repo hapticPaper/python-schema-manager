@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "python-schema-manager"
-version = "1.0.0"
+version = "1.0.1"
 description = "A lightweight ETL utility package that provides schema-driven data transformation and export capabilities"
 readme = "README.md"
 license = {text = "MIT"}
@@ -65,7 +65,7 @@ Issues = "https://github.com/hapticPaper/python-schema-manager/issues"
 Documentation = "https://github.com/hapticPaper/python-schema-manager#readme"
 
 [tool.setuptools]
-packages = ["schema_registry"]
+packages = ["schema_registry", "schema_registry.dialects", "schema_registry.examples"]
 
 [tool.setuptools.package-data]
 schema_registry = ["examples/*.json"]
