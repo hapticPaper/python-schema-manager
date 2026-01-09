@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "python-schema-manager"
-version = "1.1.0"
+version = "1.2.4"
 description = "A lightweight ETL utility package that provides schema-driven data transformation and export capabilities"
 readme = "README.md"
 license = {text = "MIT"}

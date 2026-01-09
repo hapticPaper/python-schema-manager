@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict, Any
 from .schema_loader import TableSchema
 from .sql_types import SQLEngine
 
@@ -37,7 +37,9 @@ class MergeManager:
         self.column_map = {col.name: col for col in schema.columns}
 
         if HAS_STRUCTLOG:
-            logger.info("MergeManager initialized", table_name=schema.name, engine=engine.value)
+            logger.info(
+                "MergeManager initialized", table_name=schema.name, engine=engine.value
+            )
         else:
             logger.info(
                 f"MergeManager initialized for table {schema.name} (Engine: {engine.value})"
@@ -59,7 +61,9 @@ class MergeManager:
         unknown_cols = [col for col in incoming_columns if col not in self.column_map]
 
         if unknown_cols:
-            error_msg = f"Incoming data contains unknown columns: {', '.join(unknown_cols)}"
+            error_msg = (
+                f"Incoming data contains unknown columns: {', '.join(unknown_cols)}"
+            )
             if HAS_STRUCTLOG:
                 logger.error("Schema validation failed", unknown_columns=unknown_cols)
             else:
@@ -103,9 +107,9 @@ class MergeManager:
         for k in join_keys:
             select_clause_parts.append(f"COALESCE(T.{k}, S.{k}) as {k}")
 
-        for label_col in label_columns:
-            if label_col not in join_keys:
-                select_clause_parts.append(f"COALESCE(T.{label_col}, S.{label_col}) as {label_col}")
+        for l in label_columns:
+            if l not in join_keys:
+                select_clause_parts.append(f"COALESCE(T.{l}, S.{l}) as {l}")
 
         # 3. Build Change Detection & Object Construction (BigQuery Dialect Focus)
         # We want arrays of objects {col: "col_name", old: "val", new: "val"}
@@ -137,10 +141,8 @@ class MergeManager:
             # We use STRING for everything in the diff report for simplicity.
             diff_object = f"""
                 IF({check_diff}, 
-                   parts = [
-                f"STRUCT('{col.name}' as name, CAST(T.{col.name} AS STRING) as old, CAST(S.{col.name} AS STRING) as new)"
-                for col in data_columns
-            ]    NULL)
+                   JSON_OBJECT('column', '{col}', 'old', CAST(T.{col} AS STRING), 'new', CAST(S.{col} AS STRING)), 
+                   NULL)
             """
             change_array_elements.append(diff_object)
 
@@ -162,17 +164,13 @@ class MergeManager:
         # 4. Filter only rows with changes or new rows
         # Change condition: Same check as above OR new row
 
-        where_clause_parts = []
-
         # Updates
         updates_check_parts = []
         for col in update_columns:
             if col not in join_keys:
-                updates_check_parts.append(
-                    f"""
+                updates_check_parts.append(f"""
                 (T.{col} <> S.{col} OR (T.{col} IS NULL AND S.{col} IS NOT NULL) OR (T.{col} IS NOT NULL AND S.{col} IS NULL))
-                """
-                )
+                """)
 
         if updates_check_parts:
             updates_check = "(" + " OR ".join(updates_check_parts) + ")"
@@ -180,7 +178,9 @@ class MergeManager:
             updates_check = "FALSE"  # Should warn if no update columns?
 
         # New records (T.id IS NULL)
-        new_record_check = f"T.{join_keys[0]} IS NULL"  # Assuming first key is sufficient indicator
+        new_record_check = (
+            f"T.{join_keys[0]} IS NULL"  # Assuming first key is sufficient indicator
+        )
 
         final_select = ",\n            ".join(select_clause_parts)
 
@@ -204,7 +204,11 @@ class MergeManager:
         return sql.strip()
 
     def generate_merge_sql(
-        self, source_table: str, target_table: str, join_keys: List[str], update_columns: List[str]
+        self,
+        source_table: str,
+        target_table: str,
+        join_keys: List[str],
+        update_columns: List[str],
     ) -> str:
         """
         Generates the standard MERGE statement to apply changes.
@@ -245,4 +249,106 @@ class MergeManager:
 
         return sql.strip()
 
+    def _quote_identifier(self, identifier: str) -> str:
+        """Quotes an identifier based on the SQL engine."""
+        if self.engine == SQLEngine.POSTGRES:
+            return f'"{identifier}"'
+        # Default to BigQuery/backticks for others
+        return f"`{identifier}`"
 
+    def create_table_sql(self, table_name: str) -> str:
+        """
+        Generates CREATE TABLE SQL based on the schema.
+
+        Args:
+            table_name: Name of the table to create
+
+        Returns:
+            CREATE TABLE SQL string
+        """
+        columns_sql = []
+        for col in self.schema.columns:
+            col_def = f"{col.name} {col.type.value}"
+
+            if col.mode == "REQUIRED":
+                col_def += " NOT NULL"
+            elif col.mode == "REPEATED":
+                col_def = f"{col.name} ARRAY<{col.type.value}>"  # BigQuery style
+
+            columns_sql.append(col_def)
+
+        cols_str = ",\n    ".join(columns_sql)
+        quoted_table = self._quote_identifier(table_name)
+        return f"CREATE TABLE IF NOT EXISTS {quoted_table} (\n    {cols_str}\n)"
+
+    def _format_value_for_sql(self, value: Any) -> str:
+        """Formats a Python value for SQL injection."""
+        if value is None:
+            return "NULL"
+        if isinstance(value, bool):
+            return "TRUE" if value else "FALSE"
+        if isinstance(value, str):
+            # Basic escaping - simplistic for now
+            escaped = value.replace("'", "\\'")
+            return f"'{escaped}'"
+        if isinstance(value, (int, float)):
+            return str(value)
+        # Datetime/Date/Timestamp handling - basic ISO format
+        if hasattr(value, "isoformat"):
+            return f"'{value.isoformat()}'"
+
+        return str(value)
+
+    def generate_insert_sql(self, table_name: str, data: Dict[str, Any]) -> str:
+        """
+        Generates a single INSERT statement.
+
+        Args:
+            table_name: Name of the target table
+            data: Dictionary of {column: value}
+
+        Returns:
+            INSERT SQL string
+        """
+        self.validate_incoming_columns(list(data.keys()))
+
+        columns = list(data.keys())
+
+        vals = [self._format_value_for_sql(data[col]) for col in columns]
+
+        cols_str = ", ".join(columns)
+        vals_str = ", ".join(vals)
+        quoted_table = self._quote_identifier(table_name)
+
+        return f"INSERT INTO {quoted_table} ({cols_str}) VALUES ({vals_str})"
+
+    def generate_bulk_insert_sql(
+        self, table_name: str, data: List[Dict[str, Any]]
+    ) -> str:
+        """
+        Generates a bulk INSERT statement.
+
+        Args:
+            table_name: Name of the target table
+            data: List of dictionaries
+
+        Returns:
+            Bulk INSERT SQL string
+        """
+        if not data:
+            return ""
+
+        # Validate columns for the first record
+        columns = list(data[0].keys())
+        self.validate_incoming_columns(columns)
+
+        values_groups = []
+        for row in data:
+            row_vals = [self._format_value_for_sql(row.get(col)) for col in columns]
+            values_groups.append(f"({', '.join(row_vals)})")
+
+        cols_str = ", ".join(columns)
+        vals_block = ",\n    ".join(values_groups)
+        quoted_table = self._quote_identifier(table_name)
+
+        return f"INSERT INTO {quoted_table} ({cols_str}) VALUES \n    {vals_block}"

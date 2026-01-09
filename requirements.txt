@@ -13,3 +13,5 @@ pyarrow>=10.0.0
 # Optional: Structured logging (recommended)
 # Uncomment the line below if you want structured logging support
 # structlog>=22.0.0
+
+psycopg2-binary

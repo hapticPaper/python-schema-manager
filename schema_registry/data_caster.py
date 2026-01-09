@@ -94,10 +94,14 @@ class DataCaster:
         if handler is None:
             if HAS_STRUCTLOG:
                 logger.warning(
-                    "No handler for type", column_name=column.name, column_type=column.type
+                    "No handler for type",
+                    column_name=column.name,
+                    column_type=column.type,
                 )
             else:
-                logger.warning(f"No handler for type {column.type} in column {column.name}")
+                logger.warning(
+                    f"No handler for type {column.type} in column {column.name}"
+                )
             return value
 
         # Apply the type handler
@@ -181,7 +185,9 @@ class DataCaster:
                             computation=comp_str,
                         )
                     else:
-                        logger.warning(f"Unknown computation format for {column.name}: {comp_str}")
+                        logger.warning(
+                            f"Unknown computation format for {column.name}: {comp_str}"
+                        )
 
             except Exception as e:
                 if HAS_STRUCTLOG:
@@ -195,6 +201,18 @@ class DataCaster:
                     logger.error(f"Error computing field {column.name}: {e}")
 
         return df_computed
+
+    def to_dataframe(self, data: list[dict[str, Any]]) -> pd.DataFrame:
+        """
+        Convert a list of dictionaries to a pandas DataFrame.
+
+        Args:
+            data: List of dictionaries
+
+        Returns:
+            DataFrame with casted columns
+        """
+        return self.cast_dataframe(pd.DataFrame(data))
 
     def cast_dataframe(self, df: pd.DataFrame, inplace: bool = True) -> pd.DataFrame:
         """
@@ -211,7 +229,9 @@ class DataCaster:
             DataFrame with casted columns
         """
         if HAS_STRUCTLOG:
-            logger.info("Casting DataFrame", table_name=self.schema.name, num_rows=len(df))
+            logger.info(
+                "Casting DataFrame", table_name=self.schema.name, num_rows=len(df)
+            )
         else:
             logger.info(f"Casting DataFrame for {self.schema.name} with {len(df)} rows")
 
@@ -238,12 +258,16 @@ class DataCaster:
                     # Optimization: Skip processing for all-null columns
                     if casted_df[column.name].isna().all():
                         if column.mode == "REQUIRED":
-                            raise ValueError(f"Required column '{column.name}' cannot be all null")
-                        
+                            raise ValueError(
+                                f"Required column '{column.name}' cannot be all null"
+                            )
+
                         target_dtype = self.pandas_dtype_map.get(column.type)
                         if target_dtype:
                             try:
-                                casted_df[column.name] = casted_df[column.name].astype(target_dtype)
+                                casted_df[column.name] = casted_df[column.name].astype(
+                                    target_dtype
+                                )
                             except (ValueError, TypeError):
                                 pass
                         continue
@@ -277,13 +301,13 @@ class DataCaster:
                             else:
                                 if str(current_dtype).startswith("datetime64[ns]"):
                                     continue
-                        
+
                         casted_df[column.name] = pd.to_datetime(
                             casted_df[column.name],
                             utc=(column.type == SQLType.TIMESTAMP),
                             errors="coerce",
                         )
-                    
+
                     elif column.type == SQLType.DATE:
                         # Optimization: Skip if already date objects (object dtype usually) or datetime
                         # Hard to verify 'date' objects in object dtype efficiently without checking values.
@@ -306,14 +330,18 @@ class DataCaster:
                                 mapped = True
                             else:
                                 try:
-                                    casted_df[column.name] = casted_df[column.name].astype(target_dtype)
+                                    casted_df[column.name] = casted_df[
+                                        column.name
+                                    ].astype(target_dtype)
                                     mapped = True
                                 except (ValueError, TypeError):
                                     pass
-                        
+
                         if not mapped:
                             # Apply handler to each value as last resort
-                            casted_df[column.name] = casted_df[column.name].apply(handler)
+                            casted_df[column.name] = casted_df[column.name].apply(
+                                handler
+                            )
 
                     # Handle required fields
                     if column.mode == "REQUIRED":
@@ -325,7 +353,11 @@ class DataCaster:
 
                 except Exception as e:
                     if HAS_STRUCTLOG:
-                        logger.error("Error casting column", column_name=column.name, error=str(e))
+                        logger.error(
+                            "Error casting column",
+                            column_name=column.name,
+                            error=str(e),
+                        )
                     else:
                         logger.error(f"Error casting column {column.name}: {e}")
                     raise
@@ -343,7 +375,9 @@ class DataCaster:
             List of dictionaries with casted values
         """
         if HAS_STRUCTLOG:
-            logger.info("Casting records", table_name=self.schema.name, num_records=len(records))
+            logger.info(
+                "Casting records", table_name=self.schema.name, num_records=len(records)
+            )
         else:
             logger.info(f"Casting {len(records)} records for {self.schema.name}")
 
